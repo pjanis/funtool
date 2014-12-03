@@ -1,0 +1,17 @@
+# OSX 
+.DS_Store
+
+# Python package files
+funtool.egg-info/*
+*.egg
+
+
+# Python Byte-compiled
+__pycache__/
+*.py[cod]
+
+# Vim swap
+*.sw*
+
+# Data used for testing
+data/*
