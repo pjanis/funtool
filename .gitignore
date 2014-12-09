@@ -15,3 +15,6 @@ __pycache__/
 
 # Data used for testing
 data/*
+
+dist/*
+build/*
