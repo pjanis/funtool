@@ -71,10 +71,28 @@ def _wrap_measure(individual_state_measure_process, state_measure, loaded_proces
 
 
 def state_and_parameter_measure(state_measure_function):
+    """
+    Decorator for State Measures that only require the state and parameters
+
+    Saves return value to state.measures with the State Measure's name as the key
+    """
     def wrapped_function(state_measure, analysis_collection, state_collection, overriding_parameters=None):
         measure_parameters = get_measure_parameters(state_measure, overriding_parameters)
         measure_value= state_measure_function(analysis_collection.state,measure_parameters)
         analysis_collection.state.measures[state_measure.measure_name] = measure_value
+        return analysis_collection
+    return wrapped_function
+
+def state_and_parameter_meta(state_measure_function):
+    """
+    Decorator for State Measures that only require the state and parameters
+
+    Saves return value to state.meta with the State Measure's name as the key
+    """
+    def wrapped_function(state_measure, analysis_collection, state_collection, overriding_parameters=None):
+        measure_parameters = get_measure_parameters(state_measure, overriding_parameters)
+        measure_value= state_measure_function(analysis_collection.state,measure_parameters)
+        analysis_collection.state.meta[state_measure.measure_name] = measure_value
         return analysis_collection
     return wrapped_function
 

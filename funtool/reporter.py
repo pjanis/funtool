@@ -38,6 +38,18 @@ def reporter_process(reporter): #returns a function, that accepts a state_collec
 
 
 
+
+
+def get_default_save_path(reporter_parameters):
+    if reporter_parameters.get('analysis_start_time') != None:
+        save_path= os.path.join(reporter_parameters['save_directory'],
+            "history",
+            reporter_parameters['analysis_start_time'])
+    else:
+        save_path= os.path.join(reporter_parameters['save_directory'])
+    return save_path
+
+
 def get_parameters(reporter,overriding_parameters):
     reporter_parameters= reporter.parameters
     if overriding_parameters != None:

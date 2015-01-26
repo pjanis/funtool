@@ -9,6 +9,9 @@ import uuid
 import logging
 import datetime
 import os
+import pkg_resources
+import pip
+import subprocess
 
 import funtool.state_collection
 import funtool.logger
@@ -96,6 +99,8 @@ def _load_loggers(analysis,analysis_start_time, log_dir,log_level):
     analysis_uuid= uuid.uuid4()
     loggers= funtool.logger.load_loggers(log_dir, analysis_start_time, analysis.name, analysis_uuid,log_level)
     _log_analysis_start(loggers, analysis, analysis_start_time)
+    _log_module_versions(loggers)
+    _log_version_control(loggers)
     return loggers
 
 def _log_analysis_start(loggers,analysis, analysis_start_time):
@@ -103,8 +108,31 @@ def _log_analysis_start(loggers,analysis, analysis_start_time):
     loggers.analysis_logger.warn('Analysis Start Time: %s'% analysis_start_time) 
     return loggers
 
+def _log_module_versions(loggers):
+    for package in pip.get_installed_distributions():
+        if 'funtool' in package.project_name:
+            loggers.analysis_logger.warn('%s Version: %s'% (package.project_name,pkg_resources.get_distribution(package.project_name).version))
+    return loggers
+
+def _log_version_control(loggers): #git only for now
+    try:
+        commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf8').rstrip()
+        loggers.analysis_logger.warn('Analysis Git Commit: %s'% commit_hash)
+        git_status = subprocess.check_output(['git','status','--porcelain']).decode('utf8')
+        if len(git_status) is 0:
+            loggers.analysis_logger.warn('Analysis Git Status: Clean')
+        else:
+            loggers.analysis_logger.warn('Analysis Git Status: Dirty')
+            for status_line in git_status.split("\n"):
+                loggers.analysis_logger.warn("\t"+status_line)
+            
+    except Exception:
+        pass
+    return loggers
+
+
 def _log_analysis_step(loggers):
-    return
+    return loggers
 
 def _log_analysis_complete(loggers):
     loggers.analysis_logger.warn('Analysis Complete Time: %s'% _analysis_time_str())
