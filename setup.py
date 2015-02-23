@@ -7,7 +7,10 @@ setup(name='funtool',
         author='Active Learning Lab',
         author_email='pjanisiewicz@gmail.com',
         license='MIT',
-        packages=['funtool'],
+        packages=[
+            'funtool',
+            'funtool.lib'
+        ],
         classifiers=[
             'Development Status :: 3 - Alpha',
             'Intended Audience :: Developers',
