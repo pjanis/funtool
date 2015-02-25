@@ -8,13 +8,15 @@ import functools
 import funtool.analysis
 import funtool.logger
 
-GroupMeasure = collections.namedtuple('GroupMeasure',['measure_name','measure_module','measure_function','analysis_selectors','grouping_selectors','parameters'])
+import funtool.lib.config_parse
+
+GroupMeasure = collections.namedtuple('GroupMeasure',['name','measure_module','measure_function','analysis_selectors','grouping_selectors','parameters'])
 
 # A GroupMeasure is used with an AnalysisCollection and a StateCollection to measure a Group in the StateCollection
 #   Unlike State measures, a grouping selector is required
 #   Each member of the grouping will have a new key added to it's measures (or updated if the key already exists)
 #
-# measure_name          a string identifying the measure ( from the key in the YAML measure definition )
+# name          a string identifying the measure ( from the key in the YAML measure definition )
 # measure_module        a string indicating where the measure_function is defined
 # measure_function      a string with the name of the function which measures the group
 # analysis_selectors       a list of selectors which are run sequentially to update the AnalysisCollection
@@ -23,20 +25,10 @@ GroupMeasure = collections.namedtuple('GroupMeasure',['measure_name','measure_mo
 #
 #   After measuring each member of the grouping, the measure process returns a StateCollection
 
-def import_config(config_file_location, loaded_processes= None):
-    new_group_measures={}
-    with open(config_file_location) as f:
-        yaml_config= yaml.load(f)
-    for group_measure_name,group_measure_parameters in yaml_config.items():
-        new_group_measure= GroupMeasure(measure_name= group_measure_name, **group_measure_parameters)
-        new_group_measures[group_measure_name]= ( new_group_measure, group_measure_process(new_group_measure, loaded_processes)) 
-            # for ** explination https://docs.python.org/2/tutorial/controlflow.html#tut-unpacking-arguments
-
-    return new_group_measures
-
-
 def group_measure_process(group_measure, loaded_processes): #returns a function, that accepts a state_collection, to be used as a process
     return _wrap_measure(individual_group_measure_process(group_measure), group_measure, loaded_processes)
+
+import_config= functools.partial(funtool.lib.config_parse.import_config, GroupMeasure, group_measure_process)
 
 def individual_group_measure_process(group_measure): #returns a function that accepts an analysis_collection and a state_collection
     group_measure_module = importlib.import_module(group_measure.measure_module)

@@ -119,6 +119,7 @@ def _load_from_locations(process_type,locations):
         for process_type_alt in process_type_alts:
             process_directory= os.path.join(location,_process_type_default_directory(process_type_alt))
             for config_file in _available_config_files(process_directory): 
+                print("Loading Processes From: " + os.path.join(process_directory,config_file)) #TODO:Add to logger during preflight step
                 for process_name,process in process_config_import(config_file).items():
                     loaded_processes[process_name]= funtool.analysis.Process(*process)
     return loaded_processes

@@ -89,6 +89,10 @@ def check_process_existence(analysis,known_processes, known_analyses):
                 known_processes[process_id.process_type][process_id.process_name]
         except KeyError:
             print("Process " + process_id.process_type + " "+ process_id.process_name + " is unknown.")
+            print("Known Process are:")
+            for (known_process_type, known_processes_of_type) in known_processes.items():
+                for (known_process_name, known_process) in known_processes_of_type.items():
+                    print(known_process_type + ":" + known_process_name) 
             missing_processes= True
     if missing_processes :
         raise Exception("Missing Processes")

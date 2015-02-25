@@ -24,6 +24,11 @@ def join_state_collections( collection_a, collection_b):
 
 
 def add_grouping(state_collection, grouping_name, loaded_processes, overriding_parameters=None):
+    """
+    Adds a grouping to a state collection by using the process selected by the grouping name
+    
+    Does not override existing groupings
+    """
     if (
         grouping_name not in state_collection.groups_dict and
         loaded_processes != None and

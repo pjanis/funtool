@@ -6,6 +6,7 @@ import importlib
 import functools
 import os
 
+import funtool.lib.config_parse
 
 
 Reporter = collections.namedtuple('Reporter',['reporter_module','reporter_function','parameters'])
@@ -19,22 +20,11 @@ Reporter = collections.namedtuple('Reporter',['reporter_module','reporter_functi
 class ReporterError(Exception):
     pass
 
-def import_config(config_file_location):
-    new_reporters={}
-    with open(config_file_location) as f:
-        yaml_config= yaml.load(f)
-    for reporter_name,reporter_parameters in yaml_config.items():
-        new_reporter= Reporter(**reporter_parameters)
-        new_reporters[reporter_name]= (new_reporter, reporter_process(new_reporter)) 
-            # for ** explination https://docs.python.org/2/tutorial/controlflow.html#tut-unpacking-arguments
-
-    return new_reporters
-
-
 def reporter_process(reporter): #returns a function, that accepts a state_collection, to be used as a process
     reporter_module = importlib.import_module(reporter.reporter_module)
     return functools.partial( getattr(reporter_module,reporter.reporter_function), reporter )
-   
+
+import_config= functools.partial(funtool.lib.config_parse.import_config, Reporter, reporter_process)   
 
 
 
@@ -47,6 +37,8 @@ def get_default_save_path(reporter_parameters):
             reporter_parameters['analysis_start_time'])
     else:
         save_path= os.path.join(reporter_parameters['save_directory'])
+    if reporter_parameters.get('save_subdirectory') != None:
+        save_path= os.path.join(save_path,reporter_parameters.get('save_subdirectory'))
     return save_path
 
 
