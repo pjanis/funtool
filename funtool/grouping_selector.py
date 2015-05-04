@@ -18,8 +18,8 @@ GroupingSelector = collections.namedtuple('GroupingSelector',['name','selector_m
 # selector_function         a function used to create the selection
 # parameters                a dict of parameters for the selector function
 #
-# A grouping selector process returns a state collection with the state_collections groups_dict updated
-#  AND WITH groups_dict updated in each state !!!
+# A grouping selector process returns a state collection with the state_collections groupings updated
+#  AND WITH groupings updated in each state !!!
 
 
 def grouping_selector_process(grouping_selector): #returns a function, that accepts a state_collection, to be used as a process
@@ -30,11 +30,11 @@ import_config= functools.partial(funtool.lib.config_parse.import_config, Groupin
     
 
 def add_groups_to_grouping(state_collection, grouping_name, groups):
-    current_groups= state_collection.groups_dict.get(grouping_name)
+    current_groups= state_collection.groupings.get(grouping_name)
     if current_groups is None:
-        state_collection.groups_dict[grouping_name]= groups
+        state_collection.groupings[grouping_name]= groups
     else:
-        state_collection.groups_dict[grouping_name]+= groups
+        state_collection.groupings[grouping_name]+= groups
     return state_collection
 
 get_selector_parameters= funtool.lib.general.get_parameters

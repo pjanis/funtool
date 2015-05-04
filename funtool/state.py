@@ -2,7 +2,7 @@
 
 import collections
 
-State = collections.namedtuple('State',['id','data','measures','meta','groups_dict'] )
+State = collections.namedtuple('State',['id','data','measures','meta','groupings'] )
 
 # A state is the basic unit of analysis. It can be anything that can be coerced into the given form,
 # though most measures will assume a particular structure for data
@@ -14,7 +14,7 @@ State = collections.namedtuple('State',['id','data','measures','meta','groups_di
 #       be partially populated by an adaptor when a value already exists.
 # meta          a dict of any set of data about the state, such as student_id, project_id, etc.
 #       Important meta keys will be listed below along with a short description of the use
-# groups_dict   a dict which contains the selector method used to create the groups as a key
+# groupings   a dict which contains the selector method used to create the groups as a key
 #       and a list groups that this state is a member of as the value
 #       For Example: if states are grouped by project id, then the project id selector name would
 #           be the key, and the value would be a single valued list of the group this state was in

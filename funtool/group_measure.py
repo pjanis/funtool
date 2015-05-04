@@ -45,7 +45,7 @@ def _wrap_measure(individual_group_measure_process, group_measure, loaded_proces
             if group_measure.grouping_selectors != None:
                 for grouping_selector_name in group_measure.grouping_selectors:
                     state_collection= funtool.state_collection.add_grouping(state_collection, grouping_selector_name, loaded_processes) 
-                    for group in state_collection.groups_dict[grouping_selector_name]:
+                    for group in state_collection.groupings[grouping_selector_name]:
                         analysis_collection = funtool.analysis.AnalysisCollection(None,group,[])
                         if group_measure.analysis_selectors != None:
                             for analysis_selector in group_measure.analysis_selectors:

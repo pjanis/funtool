@@ -18,8 +18,17 @@ Group = collections.namedtuple('Group',['group_selector_name','states','measures
 def create_group(group_selector_name,states,measures,meta,data):         
     new_group = Group(group_selector_name,states,measures,meta,data)
     for state in states:
-        if state.groups_dict.get(group_selector_name, None) == None:
-            state.groups_dict[group_selector_name] = [ new_group ]
-        else:
-            state.groups_dict[group_selector_name]+= [ new_group ]
+        add_group_reference_to_state(new_group, state)
     return new_group
+
+def add_state_to_group(group,state):
+    group.states.append(state)
+    add_group_reference_to_state(group,state)
+    return group
+
+def add_group_reference_to_state(group, state):
+    if state.groupings.get(group.group_selector_name, None) is None:
+        state.groupings[group.group_selector_name] = [ group ]
+    else:
+        state.groupings[group.group_selector_name]+= [ group ]
+    return state

@@ -3,10 +3,10 @@
 import collections
 import funtool.analysis
 
-StateCollection = collections.namedtuple('StateCollection',['states','groups_dict'])
+StateCollection = collections.namedtuple('StateCollection',['states','groupings'])
 
 # A StateCollection is the default collection for a funtool. It consists of a list of states (from state.py)
-# along with a groups_dict, which has selector names as keys ( see selector.py ) and a list of groups (from group.py)  
+# along with groupings, a dict, which has selector names as keys ( see selector.py ) and a list of groups (from group.py)  
 
 def join_state_collections( collection_a, collection_b):
     """
@@ -19,8 +19,8 @@ def join_state_collections( collection_a, collection_b):
     
     return StateCollection(
             (collection_a.states + collection_b.states), 
-            { group_selector_method:(collection_a.groups_dict.get(group_selector_method,[]) + collection_b.groups_dict.get(group_selector_method,[]))
-                for group_selector_method in set( list(collection_a.groups_dict.keys()) + list(collection_b.groups_dict.keys()) ) })
+            { group_selector_method:(collection_a.groupings.get(group_selector_method,[]) + collection_b.groupings.get(group_selector_method,[]))
+                for group_selector_method in set( list(collection_a.groupings.keys()) + list(collection_b.groupings.keys()) ) })
 
 
 def add_grouping(state_collection, grouping_name, loaded_processes, overriding_parameters=None):
@@ -30,7 +30,7 @@ def add_grouping(state_collection, grouping_name, loaded_processes, overriding_p
     Does not override existing groupings
     """
     if (
-        grouping_name not in state_collection.groups_dict and
+        grouping_name not in state_collection.groupings and
         loaded_processes != None and
         loaded_processes["grouping_selector"].get(grouping_name) != None
     ):
