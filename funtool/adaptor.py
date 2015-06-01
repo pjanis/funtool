@@ -6,9 +6,10 @@ import importlib
 import functools
 
 import funtool.lib.config_parse
+import funtool.lib.general
 
 
-Adaptor = collections.namedtuple('Adaptor',['adaptor_module','adaptor_function','data_location'])
+Adaptor = collections.namedtuple('Adaptor',['adaptor_module','adaptor_function','parameters'])
 
 # An adaptor contains three attributes,
 # adaptor_module      this gives the location of the file which defines the adaptor
@@ -24,3 +25,5 @@ def adaptor_process(adaptor): #returns a function, that accepts a state_collecti
     return functools.partial( getattr(adaptor_module,adaptor.adaptor_function), adaptor )
     
 import_config= functools.partial(funtool.lib.config_parse.import_config, Adaptor, adaptor_process)
+
+get_adaptor_parameters= funtool.lib.general.get_parameters

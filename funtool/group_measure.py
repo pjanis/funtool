@@ -5,6 +5,7 @@ import yaml
 import importlib
 import functools
 
+import funtool.state_collection
 import funtool.analysis
 import funtool.logger
 
@@ -45,8 +46,8 @@ def _wrap_measure(individual_group_measure_process, group_measure, loaded_proces
             if group_measure.grouping_selectors != None:
                 for grouping_selector_name in group_measure.grouping_selectors:
                     state_collection= funtool.state_collection.add_grouping(state_collection, grouping_selector_name, loaded_processes) 
-                    for group in state_collection.groupings[grouping_selector_name]:
-                        analysis_collection = funtool.analysis.AnalysisCollection(None,group,[])
+                    for group in funtool.state_collection.groups_in_grouping(state_collection, grouping_selector_name):
+                        analysis_collection = funtool.analysis.AnalysisCollection(None,group,{},{})
                         if group_measure.analysis_selectors != None:
                             for analysis_selector in group_measure.analysis_selectors:
                                 analysis_collection = loaded_processes["analysis_selector"][analysis_selector].process_function(analysis_collection,state_collection)

@@ -27,14 +27,15 @@ ProcessIdentifier = collections.namedtuple('ProcessIdentifier', ['process_type',
 Process= collections.namedtuple('Process',['collection','process_function'])
 
 
-AnalysisCollection = collections.namedtuple('AnalysisCollection',['state','group','state_list'])
+AnalysisCollection = collections.namedtuple('AnalysisCollection',['state','group','states_dict','groupings'])
 
 # An AnalysisCollection is a collection generated from a StateCollection used during part of the analysis
 #
 # In this collection are:
 # state         a privileged state used by a process ( often the current state )
 # group         a privileged group
-# state_list    a privileged list of states, often from previous processes
+# states_dict   a dict with key: states pairs
+# groupings     a dict with grouping_selector: { group_key: group }
 
 
 def import_config(config_file_location):

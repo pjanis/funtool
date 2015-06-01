@@ -28,13 +28,4 @@ def grouping_selector_process(grouping_selector): #returns a function, that acce
 
 import_config= functools.partial(funtool.lib.config_parse.import_config, GroupingSelector, grouping_selector_process)
     
-
-def add_groups_to_grouping(state_collection, grouping_name, groups):
-    current_groups= state_collection.groupings.get(grouping_name)
-    if current_groups is None:
-        state_collection.groupings[grouping_name]= groups
-    else:
-        state_collection.groupings[grouping_name]+= groups
-    return state_collection
-
 get_selector_parameters= funtool.lib.general.get_parameters

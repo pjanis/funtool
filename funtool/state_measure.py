@@ -41,6 +41,8 @@ def individual_state_measure_process(state_measure): #returns a function that ac
 def _wrap_measure(individual_state_measure_process, state_measure, loaded_processes): 
     """
     Creates a function on a state_collection, which creates analysis_collections for each state in the collection.
+    
+    Optionally sorts the collection if the state_measure has a sort_by parameter (see funtool.lib.general.sort_states for details)
     """
     def wrapped_measure(state_collection,overriding_parameters=None,loggers=None):
         if loggers == None:
@@ -49,8 +51,12 @@ def _wrap_measure(individual_state_measure_process, state_measure, loaded_proces
             if state_measure.grouping_selectors != None:
                 for grouping_selector_name in state_measure.grouping_selectors:
                     state_collection= funtool.state_collection.add_grouping(state_collection, grouping_selector_name, loaded_processes) 
-            for state in state_collection.states:
-                analysis_collection = funtool.analysis.AnalysisCollection(state,None,[])
+            states= state_collection.states
+            measure_parameters= get_measure_parameters(state_measure, overriding_parameters)
+            if 'sort_by' in measure_parameters.keys():
+                states= funtool.lib.general.sort_states(states, measure_parameters['sort_by'])
+            for state in states:
+                analysis_collection = funtool.analysis.AnalysisCollection(state,None,{},{})
                 if state_measure.analysis_selectors != None:
                     for analysis_selector in state_measure.analysis_selectors:
                         analysis_collection = loaded_processes["analysis_selector"][analysis_selector].process_function(analysis_collection,state_collection)
@@ -87,7 +93,57 @@ def state_and_parameter_meta(state_measure_function):
         return analysis_collection
     return wrapped_function
 
+def state_and_parameter_data(state_measure_function):
+    """
+    Decorator for State Measures that only require the state and parameters
 
+    Saves return value to state.data with the State Measure's name as the key
+    """
+    def wrapped_function(state_measure, analysis_collection, state_collection, overriding_parameters=None):
+        measure_parameters = get_measure_parameters(state_measure, overriding_parameters)
+        measure_value= state_measure_function(analysis_collection.state,measure_parameters)
+        analysis_collection.state.data[state_measure.name] = measure_value
+        return analysis_collection
+    return wrapped_function
+
+def analysis_collection_and_parameter_measure(state_measure_function):
+    """
+    Decorator for State Measures that only require the analysis_collection and parameters
+
+    Saves return value to analysis_collection.state.measures with the State Measure's name as the key
+    """
+    def wrapped_function(state_measure, analysis_collection, state_collection, overriding_parameters=None):
+        measure_parameters = get_measure_parameters(state_measure, overriding_parameters)
+        measure_value= state_measure_function(analysis_collection,measure_parameters)
+        analysis_collection.state.measures[state_measure.name] = measure_value
+        return analysis_collection
+    return wrapped_function
+
+def analysis_collection_and_parameter_meta(state_measure_function):
+    """
+    Decorator for State Measures that only require the analysis_collection and parameters
+
+    Saves return value to analysis_collection.state.meta with the State Measure's name as the key
+    """
+    def wrapped_function(state_measure, analysis_collection, state_collection, overriding_parameters=None):
+        measure_parameters = get_measure_parameters(state_measure, overriding_parameters)
+        measure_value= state_measure_function(analysis_collection,measure_parameters)
+        analysis_collection.state.meta[state_measure.name] = measure_value
+        return analysis_collection
+    return wrapped_function
+
+def analysis_collection_and_parameter_data(state_measure_function):
+    """
+    Decorator for State Measures that only require the analysis_collection and parameters
+
+    Saves return value to analysis_collection.state.data with the State Measure's name as the key
+    """
+    def wrapped_function(state_measure, analysis_collection, state_collection, overriding_parameters=None):
+        measure_parameters = get_measure_parameters(state_measure, overriding_parameters)
+        measure_value= state_measure_function(analysis_collection,measure_parameters)
+        analysis_collection.state.data[state_measure.name] = measure_value
+        return analysis_collection
+    return wrapped_function
 
 get_measure_parameters= funtool.lib.general.get_parameters
 
