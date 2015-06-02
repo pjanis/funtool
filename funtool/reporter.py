@@ -56,8 +56,16 @@ def link_latest_output(output_dir):
         if os.path.isdir(os.path.join(output_dir,'history',timestamp_dir)):
             if timestamp_dir > most_recent_output:
                 most_recent_output= timestamp_dir
-    if os.path.islink(os.path.join(output_dir,'latest')): 
-        os.unlink(os.path.join(output_dir,'latest'))
-    os.symlink(os.path.abspath(os.path.join(output_dir,'history',most_recent_output)),os.path.join(output_dir,'latest'))
-    return True 
+
+    try:
+        if os.path.islink(os.path.join(output_dir,'latest')): 
+            os.unlink(os.path.join(output_dir,'latest'))
+        os.symlink(os.path.abspath(os.path.join(output_dir,'history',most_recent_output)),os.path.join(output_dir,'latest'))
+        succeed= True 
+    except OSError as e:
+        print('Failed to create symbolic links for latest reports')
+        print('OSError:',str(e))
+        succeed= False
+    return succeed
+    
     

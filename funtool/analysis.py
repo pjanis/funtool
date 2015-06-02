@@ -89,7 +89,7 @@ def check_process_existence(analysis,known_processes, known_analyses):
             else:
                 known_processes[process_id.process_type][process_id.process_name]
         except KeyError:
-            print("Process " + process_id.process_type + " "+ process_id.process_name + " is unknown.")
+            print("Process " + process_id.process_type + ":"+ process_id.process_name + " is unknown.")
             print("Known Process are:")
             for (known_process_type, known_processes_of_type) in known_processes.items():
                 for (known_process_name, known_process) in known_processes_of_type.items():
@@ -152,11 +152,16 @@ def _link_latest_logs(log_dir):
         if os.path.isdir(os.path.join(log_dir,'history',timestamp_dir)):
             if timestamp_dir > most_recent_logs:
                 most_recent_logs= timestamp_dir
-    if os.path.islink(os.path.join(log_dir,'latest')): 
-        os.unlink(os.path.join(log_dir,'latest'))
-    os.symlink(os.path.abspath(os.path.join(log_dir,'history',most_recent_logs)),os.path.join(log_dir,'latest'))
-    return True 
-
+    try:
+        if os.path.islink(os.path.join(log_dir,'latest')): 
+            os.unlink(os.path.join(log_dir,'latest'))
+        os.symlink(os.path.abspath(os.path.join(log_dir,'history',most_recent_logs)),os.path.join(log_dir,'latest'))
+        succeed= True 
+    except OSError as e:
+        print('Failed to create symbolic links for latest logs')
+        print('OSError:',str(e))
+        succeed= False
+    return succeed
 def _test_and_update_state_collection(new_state_collection,old_state_collection,loggers):
     if isinstance(new_state_collection, funtool.state_collection.StateCollection):
         return new_state_collection
