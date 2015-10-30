@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='funtool',
-        version='0.0.86',
+        version='0.0.87',
         url='https://github.com/pjanis/funtool',
         description='FUN Tool engine: Used process an analysis',
         author='Active Learning Lab',
