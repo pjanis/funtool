@@ -11,6 +11,7 @@ import funtool.logger
 import funtool.lib.config_parse
 import funtool.lib.general
 
+import datetime
 
 StateMeasure = collections.namedtuple('StateMeasure',['name','measure_module','measure_function','analysis_selectors','grouping_selectors','parameters'])
 
@@ -55,7 +56,10 @@ def _wrap_measure(individual_state_measure_process, state_measure, loaded_proces
             measure_parameters= get_measure_parameters(state_measure, overriding_parameters)
             if 'sort_by' in measure_parameters.keys():
                 states= funtool.lib.general.sort_states(states, measure_parameters['sort_by'])
-            for state in states:
+            for state_index,state in enumerate(states):
+                step_size= len(states)//20
+                if state_index % step_size == 0:
+                    loggers.status_logger.warn("{}: {} %".format( datetime.datetime.now(), round((state_index/len(states) * 100 ), 1) ) )
                 analysis_collection = funtool.analysis.AnalysisCollection(state,None,{},{})
                 if state_measure.analysis_selectors != None:
                     for analysis_selector in state_measure.analysis_selectors:

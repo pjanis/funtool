@@ -11,6 +11,7 @@ import datetime
 import os
 import pkg_resources
 import pip
+import pip.vcs
 import subprocess
 
 import funtool.state_collection
@@ -63,15 +64,15 @@ def load_processes(analysis,known_processes, known_analyses):
 def analysis_process(analysis): # returns a function which takes and returns a StateCollection and runs an analysis
     return functools.partial(run_analysis, analysis)
 
-def run_analysis(analysis,state_collection=None,log_dir=None,log_level=logging.WARN):
+def run_analysis(analysis,state_collection=None,log_dir=None,log_level=logging.INFO):
     analysis_start_time= _analysis_time_str() 
     loggers= _load_loggers(analysis, analysis_start_time, log_dir, log_level)
     overriding_parameters={ 'analysis_start_time':analysis_start_time }
-    loggers.analysis_logger.warn('Analysis Overriding Parameters: %s'% overriding_parameters)
+    loggers.analysis_logger.warning('Analysis Overriding Parameters: %s'% overriding_parameters)
     if state_collection == None :
         state_collection = funtool.state_collection.StateCollection([],{})        
     for idx,process in enumerate(analysis.processes):
-        loggers.analysis_logger.warn("\tRunning step "+ str(idx+1) + " : " + analysis.process_identifiers[idx].process_name )
+        _log_analysis_step(loggers,idx+1, analysis.process_identifiers[idx].process_type, analysis.process_identifiers[idx].process_name)
         new_state_collection= process.process_function(state_collection,overriding_parameters,loggers)
         state_collection= _test_and_update_state_collection(new_state_collection,state_collection,loggers)
     _link_latest_logs(log_dir)
@@ -109,38 +110,50 @@ def _load_loggers(analysis,analysis_start_time, log_dir,log_level):
     return loggers
 
 def _log_analysis_start(loggers,analysis, analysis_start_time):
-    loggers.analysis_logger.warn('Analysis Name: %s'% analysis.name )
-    loggers.analysis_logger.warn('Analysis Start Time: %s'% analysis_start_time) 
+    loggers.analysis_logger.warning('Analysis Name: %s'% analysis.name )
+    loggers.analysis_logger.warning('Analysis Start Time: %s'% analysis_start_time) 
     return loggers
 
 def _log_module_versions(loggers):
     for package in pip.get_installed_distributions():
         if 'funtool' in package.project_name:
-            loggers.analysis_logger.warn('%s Version: %s'% (package.project_name,pkg_resources.get_distribution(package.project_name).version))
+            if pip.vcs.vcs.get_backend_name(package.location):
+                revision= pip.vcs.vcs.get_backend_from_location(package.location)().get_revision(package.location)
+                refs= pip.vcs.vcs.get_backend_from_location(package.location)().get_refs(package.location)
+                branch= next((ref for (ref,commit) in refs.items() if commit==revision), '')
+                loggers.analysis_logger.warning('%s Version: %s Branch %s Commit: %s'% (package.project_name, package.version, branch, revision))
+            else:
+                loggers.analysis_logger.warning('%s Version: %s'% (package.project_name, package.version))
+        else:
+            loggers.analysis_logger.info('%s Version: %s'% (package.project_name, package.version))
     return loggers
 
 def _log_version_control(loggers): #git only for now
     try:
+        git_branch = subprocess.check_output(['git', 'rev-parse','--abbrev-ref','HEAD']).decode('utf8').rstrip()
+        loggers.analysis_logger.warning('Analysis Git Branch: %s'% git_branch)
         commit_hash= subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf8').rstrip()
-        loggers.analysis_logger.warn('Analysis Git Commit: %s'% commit_hash)
+        loggers.analysis_logger.warning('Analysis Git Commit: %s'% commit_hash)
         git_status = subprocess.check_output(['git','status','--porcelain']).decode('utf8')
         if len(git_status) is 0:
-            loggers.analysis_logger.warn('Analysis Git Status: Clean')
+            loggers.analysis_logger.warning('Analysis Git Status: Clean')
         else:
-            loggers.analysis_logger.warn('Analysis Git Status: Dirty')
+            loggers.analysis_logger.warning('Analysis Git Status: Dirty')
             for status_line in git_status.split("\n"):
-                loggers.analysis_logger.warn("\t"+status_line)
+                loggers.analysis_logger.warning("\t"+status_line)
             
     except Exception:
         pass
     return loggers
 
 
-def _log_analysis_step(loggers):
+def _log_analysis_step(loggers,step_number, process_type, process_name):
+    loggers.analysis_logger.warning("\tRunning step "+ str(step_number) + " : " + process_type + ":" + process_name )
+    loggers.status_logger.warning(_analysis_time_str() + " : Step "+ str(step_number) + " : " + process_type + ":" + process_name )
     return loggers
 
 def _log_analysis_complete(loggers):
-    loggers.analysis_logger.warn('Analysis Complete Time: %s'% _analysis_time_str())
+    loggers.analysis_logger.warning('Analysis Complete Time: %s'% _analysis_time_str())
     return loggers
 
 def _analysis_time_str():
@@ -167,7 +180,7 @@ def _test_and_update_state_collection(new_state_collection,old_state_collection,
         return new_state_collection
     else:
         loggers.analysis_logger.error("Error in process : StateCollection not returned")
-        loggers.analysis_logger.warn("Continuing with previous StateCollection")
+        loggers.analysis_logger.warning("Continuing with previous StateCollection")
         return old_state_collection
 
 def _expand_process_identifiers(process_parameters_dict):

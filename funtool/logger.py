@@ -19,19 +19,21 @@ def load_loggers(log_base_dir, analysis_time, analysis_name, analysis_uuid, log_
 
 def load_analysis_logger(log_dir, logger_id, log_level):
     logger= logging.getLogger(logger_id)
+    logger.setLevel(log_level)
     analysis_log= logging.FileHandler(os.path.join(log_dir,'analysis.log'))
     analysis_log.setLevel(log_level)
     analysis_log_format= logging.Formatter('%(message)s')
     analysis_log.setFormatter(analysis_log_format)
     logger.addHandler(analysis_log)
     console_log= logging.StreamHandler(sys.stdout)
-    console_log.setLevel(log_level)
+    console_log.setLevel(log_level + 10 )  #Logs STDIO at one level lower logger level
     console_log.setFormatter(analysis_log_format)
     logger.addHandler(console_log)
     return logger
 
 def load_process_logger(log_dir, logger_id, log_level):
     logger= logging.getLogger(str(logger_id)+'_process')
+    logger.setLevel(log_level)
     process_log= logging.FileHandler(os.path.join(log_dir,'process.log'))
     process_log.setLevel(log_level)
     process_log_format= logging.Formatter('%(message)s')
@@ -42,9 +44,10 @@ def load_process_logger(log_dir, logger_id, log_level):
 
 def load_status_logger(log_dir, logger_id, log_level):
     logger= logging.getLogger(str(logger_id)+'_status')
+    logger.setLevel(log_level)
     status_log= logging.FileHandler(os.path.join(log_dir,'status.log'))
     status_log.setLevel(log_level)
-    status_log_format= logging.Formatter('%message)s')
+    status_log_format= logging.Formatter('%(message)s')
     status_log.setFormatter(status_log_format)
     logger.addHandler(status_log)
     return logger

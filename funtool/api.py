@@ -105,6 +105,18 @@ def run_analyses(prepared_analyses=None,log_dir=default_log_dir):
     for analysis in prepared_analyses:
         state_collection= funtool.analysis.run_analysis(analysis, state_collection, log_dir)
     return state_collection
+
+def run_analysis( named_analysis, prepared_analyses=None,log_dir=default_log_dir):
+    """
+    Runs just the named analysis. Otherwise just like run_analyses
+    """
+    if prepared_analyses == None:
+        prepared_analyses = prepare_analyses()
+    state_collection = funtool.state_collection.StateCollection([],{})
+    for analysis in prepared_analyses:
+        if analysis.name == named_analysis:
+            state_collection= funtool.analysis.run_analysis(analysis, state_collection, log_dir)
+    return state_collection
     
        
 
